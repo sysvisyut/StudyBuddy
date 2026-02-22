@@ -1,8 +1,10 @@
 import React from 'react'
-
+import WelcomeBanner from './_components/welcomeBanner'
 function Dashboard() {
   return (
-    <div>Dashboard</div>
+    <div>
+      <WelcomeBanner/>
+    </div>
   )
 }
 

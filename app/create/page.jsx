@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
+import { Loader } from 'lucide-react';
 
 function Create() {
     const [step, setStep] = useState(0);
     const [formData, setFormData] = useState([]);
     const { user } = useUser();
+    const [loading,setLoading] = useState(false);
 
     const handleInputChange = (userInput, fieldName) => {
         setFormData(prev => ({
@@ -25,6 +27,7 @@ function Create() {
 
     const GenerateCourseOutline = async () => {
         const courseId = uuidv4();
+        setLoading(true);
         const result = await axios.post('/api/generate-course-outline', {
             courseId: courseId,
             topic: formData?.topic || "Custom Topic",
@@ -32,8 +35,9 @@ function Create() {
             difficultyLevel: formData?.difficulty || "Medium",
             createdBy: user?.primaryEmailAddress?.emailAddress
         });
+        setLoading(false);
 
-        console.log(result);
+        console.log(result.data.result.resp);
     }
 
     return (
@@ -71,10 +75,12 @@ function Create() {
 
                 {step == 0 ? null : (
                     <Button
-                        onClick={() => GenerateCourseOutline()}
+                        onClick={() => GenerateCourseOutline()} 
+                        disabled={loading}
                         className='px-12 py-8 text-xl rounded-full bg-white text-black hover:bg-slate-200 transition-all font-black uppercase tracking-tight'
                     >
-                        Generate
+
+                        {loading?<Loader className='animate-spin' />:'Generate' }
                     </Button>
                 )}
             </div>

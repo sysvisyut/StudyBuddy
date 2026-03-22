@@ -13,7 +13,9 @@ function Provider({ children }) {
     }
 
     useEffect(() => {
-        user && CheckIsNewUser();
+        if (user) {
+            CheckIsNewUser();
+        }
     }, [user]);
 
     return (

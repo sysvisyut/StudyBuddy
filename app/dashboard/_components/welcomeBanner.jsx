@@ -5,12 +5,13 @@ import { useUser } from '@clerk/nextjs'
 function WelcomeBanner() {
   const { user } = useUser();
   return (
-    <div className='p-6 bg-primary w-full text-white rounded-lg flex items-center gap-6'>
-      <Image src={'/laptop1.png'} alt='laptop' width={100} height={100} />
-      <div>
-        <h2 className='text-3xl font-bold'>Hello, {user?.fullName}</h2>
-        <p className='text-sm font-light'>Welcome back! Ready to continue your learning journey?</p>
-      </div>
+    <div className='w-full text-white'>
+      <h2 className='text-7xl font-bold tracking-tight mb-4'>
+        Hello, {user?.fullName?.split(' ')[0]}
+      </h2>
+      <p className='text-2xl text-slate-400 font-medium max-w-2xl leading-relaxed'>
+        Your personalized AI study companion. Ready to build something amazing today?
+      </p>
     </div>
   )
 }

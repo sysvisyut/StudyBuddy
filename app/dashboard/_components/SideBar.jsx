@@ -31,7 +31,7 @@ function SideBar() {
   return (
     <div className='h-screen p-5 flex flex-col'>
       <div className='flex items-center gap-2 mb-10'>
-        <Image src={'/logo.svg'} alt='logo' width={40} height={40} />
+        <Image src={'/logo.svg'} alt='logo' width={40} height={40} style={{ width: 'auto', height: 'auto' }} />
         <h2 className="font-bold text-2xl text-white tracking-tight">Study Buddy</h2>
       </div>
 

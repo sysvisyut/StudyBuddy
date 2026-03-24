@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation';
 import SelectOption from './_components/SelectOption';
 import TopicInput from './_components/TopicInput';
 import { Button } from '@/components/ui/button';
@@ -15,15 +16,16 @@ function Create() {
     const { user } = useUser();
     const [loading,setLoading] = useState(false);
 
+
+    const router = useRouter();
+
     const handleInputChange = (userInput, fieldName) => {
         setFormData(prev => ({
             ...prev,
             [fieldName]: userInput
         }))
     }
-    /*
-    Used to save user input and generate AI course layout
-    */
+
 
     const GenerateCourseOutline = async () => {
         const courseId = uuidv4();
@@ -36,8 +38,8 @@ function Create() {
             createdBy: user?.primaryEmailAddress?.emailAddress
         });
         setLoading(false);
-
-        console.log(result.data.result.resp);
+        router.replace('/dashboard');
+        console.log(result.data.result);
     }
 
     return (

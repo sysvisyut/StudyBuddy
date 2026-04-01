@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useUser } from '@clerk/nextjs'
 import CourseCardItem from './CourseCardItem'
+import { toast } from 'sonner'
 
 function CourseList() {
 
@@ -14,13 +15,35 @@ function CourseList() {
         user&&GetCourseList();
     },[user])
 
+    useEffect(() => {
+        let intervalId;
+        const isGenerating = courseList.some(course => course.status === 'Generating');
+        if (isGenerating) {
+            intervalId = setInterval(() => {
+                user && GetCourseList();
+            }, 5000);
+        }
+        return () => clearInterval(intervalId);
+    }, [courseList, user]);
+
     const GetCourseList=async()=>{
        const result = await axios.post('/api/courses',{
             createdBy:user?.primaryEmailAddress?.emailAddress //trigger the api call
 
         })
-        setCourseList(result.data.result);
-        console.log(result) // check here(for my reference)
+        
+        setCourseList((prevList) => {
+            const newList = result.data.result;
+            if (prevList.length > 0) {
+                newList.forEach((newCourse) => {
+                    const prevCourse = prevList.find(c => c.courseId === newCourse.courseId);
+                    if (prevCourse && prevCourse.status === 'Generating' && newCourse.status === 'Ready') {
+                        toast.success(`Your course '${newCourse.topic}' is ready!`);
+                    }
+                });
+            }
+            return newList;
+        });
     }
   return (
     <div className='mt-10'>

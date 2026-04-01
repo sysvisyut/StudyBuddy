@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import axios from 'axios'
+import { Toaster } from 'sonner'
 
 function Provider({ children }) {
     const { user } = useUser();
@@ -21,6 +22,7 @@ function Provider({ children }) {
     return (
         <div>
             {children}
+            <Toaster position="top-right" richColors />
         </div>
     )
 }

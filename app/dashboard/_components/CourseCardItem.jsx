@@ -1,5 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
+import { RefreshCw } from 'lucide-react'
 
 function CourseCardItem({ course }) {
   return (
@@ -18,7 +19,15 @@ function CourseCardItem({ course }) {
                     </div>
                 </div>
             </div>
-            <p className='text-sm text-slate-400 mt-1 line-clamp-1 font-medium'>{course?.courseType || "Standard Course"}</p>
+            <div className='flex items-center justify-between mt-1'>
+                <p className='text-sm text-slate-400 line-clamp-1 font-medium'>{course?.courseType || "Standard Course"}</p>
+                {course?.status === 'Generating' && (
+                    <div className='flex items-center gap-1.5 text-[11px] font-bold text-slate-300 bg-slate-700/50 px-2 py-1 rounded-full shrink-0'>
+                        <RefreshCw className='w-3 h-3 animate-spin text-indigo-400' />
+                        Generating...
+                    </div>
+                )}
+            </div>
         </div>
     </div>
   )

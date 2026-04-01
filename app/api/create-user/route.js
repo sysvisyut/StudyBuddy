@@ -7,6 +7,10 @@ export async function POST(req) {
     try {
         const { user } = await req.json();
 
+        if (!user?.primaryEmailAddress?.emailAddress) {
+            return NextResponse.json({ error: "User email address is missing" }, { status: 400 });
+        }
+
         // Check if user already exists
         const result = await db.select().from(USER_TABLE)
             .where(eq(USER_TABLE.email, user?.primaryEmailAddress?.emailAddress));

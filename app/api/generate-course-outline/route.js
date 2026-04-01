@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { courseOutlineAIModel } from "@/configs/AiModel";
 import { db } from "@/configs/db";
 import { STUDY_MATERIAL_TABLE } from "@/configs/schema";
+import { inngest } from "@/inngest/client";
 
 export async function POST(req) {
     try {
@@ -19,13 +20,21 @@ export async function POST(req) {
             difficultyLevel: difficultyLevel,
             courseLayout: aiResult,
             createdBy: createdBy
-        }).returning({ id: STUDY_MATERIAL_TABLE.id });
+        }).returning({ resp: STUDY_MATERIAL_TABLE});
 
         //save the result along with user Input
+        const result =  await inngest.send({
+            name:'notes.generate',
+            data:{
+                course:dbResult[0].resp
+            }
+        });
+        console.log(result);
         console.log("DB Inserted:", dbResult);
         return NextResponse.json({ result: dbResult[0] });
     } catch (error) {
         console.error("Error in generate-course-outline:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
 }

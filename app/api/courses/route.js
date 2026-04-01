@@ -8,6 +8,9 @@ export async function POST(req) { // export makes the fn available outside the f
     
     const {createdBy} = await req.json();
 
+    if (!createdBy) {
+        return NextResponse.json({ error: "Missing createdBy parameter" }, { status: 400 });
+    }
 
     const result = await db.select().from(STUDY_MATERIAL_TABLE)
     .where(eq(STUDY_MATERIAL_TABLE.createdBy,createdBy))

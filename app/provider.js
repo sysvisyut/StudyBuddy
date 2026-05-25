@@ -7,13 +7,16 @@ import { Toaster } from 'sonner'
 function Provider({ children }) {
     const { user } = useUser();
 
-    const CheckIsNewUser = async () => {
-        // We now call the API route instead of accessing the DB directly
-        const resp = await axios.post('/api/create-user', { user: user });
-        console.log(resp.data);
-    }
-
     useEffect(() => {
+        async function CheckIsNewUser() {
+            try {
+                const resp = await axios.post('/api/create-user', { user: user });
+                console.log(resp.data);
+            } catch (error) {
+                console.error("Database connection error (offline):", error.message);
+            }
+        }
+
         if (user) {
             CheckIsNewUser();
         }

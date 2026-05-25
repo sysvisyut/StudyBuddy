@@ -1,6 +1,5 @@
 "use client"
 import React from 'react'
-import Image from 'next/image'
 import { useUser } from '@clerk/nextjs'
 function WelcomeBanner() {
   const { user } = useUser();

@@ -19,7 +19,7 @@ export const CreateNewUser = inngest.createFunction(
     async ({ event, step }) => {
         // get event data
         const {user} = event.data; 
-        const result = await step.run('Check user and create new if not in DB', async () => {
+        await step.run('Check user and create new if not in DB', async () => {
             const result = await db.select().from(USER_TABLE)
                 .where(eq(USER_TABLE.email, user?.primaryEmailAddress?.emailAddress))
             console.log(result);
@@ -46,7 +46,7 @@ export const GenerateNotes = inngest.createFunction(
         const {course} = event.data; // all the record are stored here
 
         //generate notes for each chapter
-        const notesResult = await step.run('Generate Chapter Notes',async()=>{
+        await step.run('Generate Chapter Notes',async()=>{
             const Chapters = course?.courseLayout?.chapters;
             let index = 0;
             for (const chapter of Chapters) {
@@ -65,8 +65,8 @@ export const GenerateNotes = inngest.createFunction(
         })
 
         //update course status to ready
-        const updateCourseStatusResult = await step.run('Update Course Status to Ready',async()=>{
-            const result = await db.update(STUDY_MATERIAL_TABLE).set({
+        await step.run('Update Course Status to Ready',async()=>{
+            await db.update(STUDY_MATERIAL_TABLE).set({
                 status: 'Ready'
             }).where(eq(STUDY_MATERIAL_TABLE.courseId, course?.courseId));
             return 'Success';

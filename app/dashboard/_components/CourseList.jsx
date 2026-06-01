@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useUser } from '@clerk/nextjs'
 import CourseCardItem from './CourseCardItem'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 
 function CourseList() {
 
@@ -12,6 +12,7 @@ function CourseList() {
 
     const[courseList, setCourseList] = useState([]);
     const[loading, setLoading] = useState(true);
+    const[refreshing, setRefreshing] = useState(false);
     
     const GetCourseList = useCallback(async () => {
         try {
@@ -36,8 +37,15 @@ function CourseList() {
             toast.error("Failed to fetch courses. Check your database connection.");
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     }, [user]);
+
+    const handleRefresh = () => {
+        if (!user || refreshing) return;
+        setRefreshing(true);
+        GetCourseList();
+    };
 
     useEffect(()=>{
         if (user) {
@@ -60,7 +68,18 @@ function CourseList() {
     }, [courseList, user, GetCourseList]);
   return (
     <div className='mt-10'>
-        <h2 className='font-bold text-2xl'>Your Study material</h2>
+        <div className='flex items-center justify-between'>
+            <h2 className='font-bold text-2xl'>Your Study material</h2>
+            <button
+                onClick={handleRefresh}
+                disabled={refreshing || loading}
+                title="Refresh courses"
+                className='flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition-all disabled:opacity-40 disabled:cursor-not-allowed'
+            >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
+            </button>
+        </div>
 
         {loading ? (
             <div className='flex justify-center items-center mt-20'>

@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
 import { Loader } from 'lucide-react';
+import { toast } from 'sonner';
 
 function Create() {
     const [step, setStep] = useState(0);
@@ -27,19 +28,19 @@ function Create() {
     }
 
 
-    const GenerateCourseOutline = async () => {
+    const GenerateCourseOutline = () => {
         const courseId = uuidv4();
         setLoading(true);
-        const result = await axios.post('/api/generate-course-outline', {
+        // Fire and forget — Inngest handles generation in the background
+        axios.post('/api/generate-course-outline', {
             courseId: courseId,
             topic: formData?.topic || "Custom Topic",
             courseType: formData?.option || "Standard",
             difficultyLevel: formData?.difficulty || "Medium",
             createdBy: user?.primaryEmailAddress?.emailAddress
         });
-        setLoading(false);
+        toast("Your Course content is generating, Please wait");
         router.replace('/dashboard');
-        console.log(result.data.result);
     }
 
     return (

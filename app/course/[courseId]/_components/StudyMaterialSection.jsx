@@ -79,11 +79,12 @@ function StudyMaterialSection({ courseId }) {
             <p className='text-slate-400 text-sm mb-5'>Pick a study mode to get started</p>
             <div className='grid grid-cols-2 md:grid-cols-3 gap-5 mt-3'>
                 {MaterialList.map((item, index) => (
+                    <Link key={index} href={item.path}>
                     <MaterialCardItem
                         item={item}
-                        key={index}
                         studyTypeContent={studyTypeContent}
                     />
+                    </Link>
                 ))}
             </div>
         </div>

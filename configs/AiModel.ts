@@ -275,14 +275,6 @@ export const generateNotesAiModel = genAI.getGenerativeModel({
 </div>` }],
       },
     ],
-    tools: [
-      {
-        googleSearch: {},
-      },
-    ],
-    // thinkingConfig: {
-    //   thinkingBudget: -1,
-    // },
   });
 
 export const courseMaterialAIModel = genAI.getGenerativeModel({

@@ -47,6 +47,10 @@ function CourseList() {
         GetCourseList();
     };
 
+    const handleDelete = (deletedCourseId) => {
+        setCourseList((prev) => prev.filter((c) => c.courseId !== deletedCourseId));
+    };
+
     useEffect(()=>{
         if (user) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -93,7 +97,7 @@ function CourseList() {
         ) : (
             <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-2 gap-5'>
                 {courseList?.map((course,index)=>(
-                    <CourseCardItem course={course} key={index}/>
+                    <CourseCardItem course={course} key={index} onDelete={handleDelete} />
                 ))}
             </div>
         )}

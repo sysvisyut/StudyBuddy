@@ -5,7 +5,7 @@ import { generateNotesAiModel } from "@/configs/AiModel";
 import { eq } from "drizzle-orm";
 
 export const helloWorld = inngest.createFunction(
-    { id: "hello-world" },
+    { id: "hello-world", name: "Hello World" },
     { event: "test/hello.world" },
     async ({ event, step }) => {
         await step.sleep("wait-a-moment", "1s");
@@ -14,7 +14,7 @@ export const helloWorld = inngest.createFunction(
 );
 
 export const CreateNewUser = inngest.createFunction(
-    { id: 'create-user' },
+    { id: 'create-user', name: 'Create User' },
     { event: 'user.created' },
     async ({ event, step }) => {
         const { user } = event.data;
@@ -38,7 +38,7 @@ export const CreateNewUser = inngest.createFunction(
 );
 
 export const GenerateNotes = inngest.createFunction(
-    { id: 'generate-notes' },
+    { id: 'generate-notes', name: 'Generate Notes' },
     { event: 'notes.generate' },
     async ({ event, step }) => {
         const { course } = event.data;
@@ -104,3 +104,15 @@ export const GenerateNotes = inngest.createFunction(
         return 'Success';
     }
 );
+
+// used to generate flashcards
+export const GenerateStudyTypeContent = inngest.createFunction(
+    {id:'Generate Study Type Content'},
+    {event:'studyType.content'},
+
+    async({event,step})=>{
+        const {studyType,prompt,courseId} = event.data;
+
+        const FlashcardAiResult = await step.run('Generating Flashcard using AI')
+    }
+)

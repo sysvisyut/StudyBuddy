@@ -28,3 +28,12 @@ export const CHAPTER_NOTES_TABLE = pgTable('chapterNotes',{
     chapterId:integer().notNull(),
     notes:text()
 })
+
+export const STUDY_TYPE_CONTENT_TABLE = pgTable('studyTypeContent',{
+    id:serial().primaryKey(),
+    courseId:varchar('courseId').notNull(),
+    content:json('content').notNull(),
+    type:varchar('status').notNull(),
+})
+
+export const GenerateFlashCards = inngest.create

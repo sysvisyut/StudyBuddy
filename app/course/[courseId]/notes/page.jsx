@@ -11,6 +11,8 @@ function ViewNotes() {
     const [stepCount, setStepCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
+    const router = useRouter();
+
     useEffect(() => {
         if (courseId) {
             GetNotes();
@@ -153,6 +155,7 @@ function ViewNotes() {
                     <span className='text-2xl'>🎉</span>
                     <h3 className='text-base font-bold text-white'>You&apos;ve reached the end!</h3>
                     <p className='text-slate-400 text-sm'>You&apos;ve reviewed all the notes for this course.</p>
+                    <Button onClick={() => router.back()}>Go to course page</Button>
                 </div>
             )}
         </div>

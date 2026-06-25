@@ -286,3 +286,59 @@ export const courseSummaryAIModel = genAI.getGenerativeModel({
   model: "gemini-2.5-flash",
   generationConfig,
 });
+
+export const generateStudyTypeContentAiModel = genAI
+  .getGenerativeModel({
+    model: "gemini-2.5-flash",
+  })
+  .startChat({
+    generationConfig: {
+      temperature: 0.7,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,
+      responseMimeType: "application/json",
+    },
+
+    history: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `Generate 10 flashcards on the topic Flutter Fundamentals.
+Return ONLY valid JSON in this format:
+
+[
+  {
+    "front": "Question",
+    "back": "Answer"
+  }
+]
+
+Do not include markdown, explanations, or code fences.`,
+          },
+        ],
+      },
+      {
+        role: "model",
+        parts: [
+          {
+            text: `[
+  {
+    "front": "What is a Widget in Flutter?",
+    "back": "A Widget is the basic building block of a Flutter application's user interface."
+  },
+  {
+    "front": "What are Stateless Widgets?",
+    "back": "Widgets whose state cannot change after they are created."
+  },
+  {
+    "front": "What are Stateful Widgets?",
+    "back": "Widgets that can rebuild when their internal state changes."
+  }
+]`,
+          },
+        ],
+      },
+    ],
+  });

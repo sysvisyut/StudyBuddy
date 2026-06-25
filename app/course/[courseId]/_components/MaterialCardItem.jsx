@@ -1,9 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import axios from 'axios'
+import { toast } from 'sonner'
 
-function MaterialCardItem({ item }) {
+function MaterialCardItem({ item, studyTypeContent, course,refreshData}) {
+
+    const [loading,setLoading]=useState(false);
+    
+
+    const GenerateContent=async()=>{
+
+        setLoading(true);
+        let chapters = '';
+        course?.courseLayout.chapters.forEach((chapter)=>{
+
+            chapters = (chapter.chapter_title||chapter.chapterTitle)+', '+chapters
+        })
+
+        const result = await axios.post('/api/study-type-content',{
+            courseId:course?.courseId,
+            type:item.value,
+            chapters: chapters
+        });
+        setLoading(false);
+        refreshData(true)
+        toast('Your Flashcard has been generated successfully')
+    }
     return (
         <Link href={item.path}>
             <div className={`group relative border border-slate-700/60 bg-gradient-to-br ${item.color || 'from-slate-700/20 to-slate-800/10'} rounded-2xl p-5 flex flex-col items-center gap-3 cursor-pointer hover:scale-105 hover:border-slate-500/80 transition-all duration-200 shadow-md hover:shadow-xl overflow-hidden`}>

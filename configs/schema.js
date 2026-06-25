@@ -34,6 +34,5 @@ export const STUDY_TYPE_CONTENT_TABLE = pgTable('studyTypeContent',{
     courseId:varchar('courseId').notNull(),
     content:json('content').notNull(),
     type:varchar('status').notNull(),
+    status:varchar('status').default('Generating')
 })
-
-export const GenerateFlashCards = inngest.create

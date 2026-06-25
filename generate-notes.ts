@@ -10,7 +10,7 @@ async function generate() {
     return process.exit(0);
   }
   const course = courses[0];
-  const chapters = course.courseLayout?.chapters || [];
+  const chapters = (course.courseLayout as any)?.chapters || [];
   console.log('Generating notes for', chapters.length, 'chapters...');
 
   for (let index = 0; index < chapters.length; index++) {
@@ -27,7 +27,7 @@ async function generate() {
       });
       console.log('Saved chapter', index + 1);
     } catch (err) {
-      console.error('Error generating chapter', index + 1, err.message);
+      console.error('Error generating chapter', index + 1, (err as any).message);
     }
   }
   

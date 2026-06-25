@@ -4,7 +4,7 @@ import Link from 'next/link'
 import MaterialCardItem from './MaterialCardItem'
 import axios from 'axios'
 
-function StudyMaterialSection({ courseId }) {
+function StudyMaterialSection({ courseId , course}) {
     const [studyTypeContent, setStudyTypeContent] = useState(null);
 
     const MaterialList = [
@@ -84,6 +84,8 @@ function StudyMaterialSection({ courseId }) {
                     <MaterialCardItem
                         item={item}
                         studyTypeContent={studyTypeContent}
+                        couse={course}
+                        refreshData={GetStudyMaterial}
                     />
                     </Link>
                 ))}

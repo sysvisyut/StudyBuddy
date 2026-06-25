@@ -43,7 +43,7 @@ function CourseViewPage() {
     return (
         <div className='p-6 md:p-10 max-w-5xl mx-auto'>
             <CourseIntroCard course={course} />
-            <StudyMaterialSection courseId={courseId} />
+            <StudyMaterialSection courseId={courseId} course={course} />
             <ChapterList course={course} />
         </div>
     );

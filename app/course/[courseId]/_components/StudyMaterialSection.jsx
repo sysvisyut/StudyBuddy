@@ -1,11 +1,11 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
+import React, { useEffect, useState, useRef } from 'react'
 import MaterialCardItem from './MaterialCardItem'
 import axios from 'axios'
 
 function StudyMaterialSection({ courseId , course}) {
     const [studyTypeContent, setStudyTypeContent] = useState(null);
+    const pollingRef = useRef(null);
 
     const MaterialList = [
         {
@@ -59,6 +59,10 @@ function StudyMaterialSection({ courseId , course}) {
         if (courseId) {
             GetStudyMaterial();
         }
+        return () => {
+            // Cleanup polling on unmount
+            if (pollingRef.current) clearInterval(pollingRef.current);
+        }
     }, [courseId])
 
     const GetStudyMaterial = async () => {
@@ -67,10 +71,58 @@ function StudyMaterialSection({ courseId , course}) {
                 courseId: courseId,
                 studyType: 'ALL'
             });
-            console.log(result?.data);
-            setStudyTypeContent(result?.data);
+            const data = result?.data;
+            setStudyTypeContent(data);
+
+            // Check if any content is currently generating — if so, start polling
+            const isGenerating = checkIfGenerating(data);
+            if (isGenerating) {
+                startPolling();
+            } else {
+                stopPolling();
+            }
         } catch (error) {
             console.error('Failed to fetch study material:', error.message);
+        }
+    }
+
+    const checkIfGenerating = (data) => {
+        if (!data) return false;
+        // Check all study types (excluding notes which is always ready)
+        const types = ['flashcard', 'quiz', 'qa'];
+        for (const type of types) {
+            const list = data[type];
+            if (list && list.length > 0 && list[0].status === 'Generating') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    const startPolling = () => {
+        if (pollingRef.current) return; // already polling
+        pollingRef.current = setInterval(async () => {
+            try {
+                const result = await axios.post('/api/study-type', {
+                    courseId: courseId,
+                    studyType: 'ALL'
+                });
+                const data = result?.data;
+                setStudyTypeContent(data);
+                // Stop polling once everything is done
+                if (!checkIfGenerating(data)) {
+                    stopPolling();
+                }
+            } catch (e) {
+                console.error('Polling error:', e);
+            }
+        }, 5000); // poll every 5 seconds
+    }
+
+    const stopPolling = () => {
+        if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
         }
     }
 
@@ -80,14 +132,13 @@ function StudyMaterialSection({ courseId , course}) {
             <p className='text-slate-400 text-sm mb-5'>Pick a study mode to get started</p>
             <div className='grid grid-cols-2 md:grid-cols-3 gap-5 mt-3'>
                 {MaterialList.map((item, index) => (
-                    <Link key={index} href={item.path}>
                     <MaterialCardItem
+                        key={index}
                         item={item}
                         studyTypeContent={studyTypeContent}
-                        couse={course}
+                        course={course}
                         refreshData={GetStudyMaterial}
                     />
-                    </Link>
                 ))}
             </div>
         </div>

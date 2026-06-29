@@ -1,6 +1,6 @@
 import { db } from "@/configs/db";
 import { CHAPTER_NOTES_TABLE, STUDY_TYPE_CONTENT_TABLE } from "@/configs/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -33,5 +33,11 @@ export async function POST(req) {
         return NextResponse.json(notes);
     }
 
-    return NextResponse.json({ error: "Invalid studyType" }, { status: 400 });
+    else{
+         const result = await db.select().from(STUDY_TYPE_CONTENT_TABLE)
+            .where(and(eq(STUDY_TYPE_CONTENT_TABLE?.courseId, courseId),
+            eq(STUDY_TYPE_CONTENT_TABLE?.type,studyType)));
+
+        return NextResponse.json(result[0] ?? null);
+    }
 }

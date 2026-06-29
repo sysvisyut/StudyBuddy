@@ -115,9 +115,22 @@ export const GenerateStudyTypeContent = inngest.createFunction(
 
         const FlashcardAiResult = await step.run('Generating Flashcard using AI',async()=>{
             const result = await generateStudyTypeContentAiModel.sendMessage(prompt);
-            const aiResp = JSON.parse(result.response.text());
+            const rawText = result.response.text();
             
-            return aiResp
+            // Strip markdown code fences if present (e.g. ```json ... ```)
+            const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+            
+            try {
+                const parsed = JSON.parse(cleaned);
+                // Normalize: if top-level has a key like "flashcards", unwrap it
+                if (Array.isArray(parsed)) return parsed;
+                const firstKey = Object.keys(parsed)[0];
+                if (firstKey && Array.isArray(parsed[firstKey])) return parsed[firstKey];
+                return parsed;
+            } catch(e) {
+                console.error('Failed to parse AI response:', cleaned);
+                throw new Error('AI returned non-JSON content: ' + cleaned.slice(0, 200));
+            }
         })
 
         const dbResult = await step.run('Save Result to DB', async()=>{

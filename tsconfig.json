@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "app/(auth)/sign-up.web.jsx", "app/(auth)/sign-up/[[...sign-up]]/page.jsx"  ],
+, "app/(auth)/sign-up.web.jsx", "app/(auth)/sign-up/[[...sign-up]]/page.jsx", "configs/AiModel.js"  ],
   "exclude": ["node_modules"]
 }

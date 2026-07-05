@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import MaterialCardItem from './MaterialCardItem'
 import axios from 'axios'
+import { BookOpen, Zap, Target, ScrollText, Mic } from 'lucide-react'
 
 function StudyMaterialSection({ courseId , course}) {
     const [studyTypeContent, setStudyTypeContent] = useState(null);
@@ -11,7 +12,7 @@ function StudyMaterialSection({ courseId , course}) {
         {
             name: 'Notes/Chapters',
             desc: 'Read notes to prepare for the exam',
-            icon: '/note.png',
+            icon: <BookOpen className="w-8 h-8 text-violet-400" />,
             path: `/course/${courseId}/notes`,
             color: 'from-violet-500/20 to-violet-600/10',
             iconBg: 'bg-violet-500/20',
@@ -20,7 +21,7 @@ function StudyMaterialSection({ courseId , course}) {
         {
             name: 'Flashcards',
             desc: 'Learn through flashcards to recollect the concepts',
-            icon: '/flashcard.png',
+            icon: <Zap className="w-8 h-8 text-blue-400" />,
             path: `/course/${courseId}/flashcards`,
             color: 'from-blue-500/20 to-blue-600/10',
             iconBg: 'bg-blue-500/20',
@@ -29,7 +30,7 @@ function StudyMaterialSection({ courseId , course}) {
         {
             name: 'Quiz',
             desc: 'Test your knowledge and improve your grades',
-            icon: '/quiz.png',
+            icon: <Target className="w-8 h-8 text-emerald-400" />,
             path: `/course/${courseId}/quiz`,
             color: 'from-emerald-500/20 to-emerald-600/10',
             iconBg: 'bg-emerald-500/20',
@@ -38,7 +39,7 @@ function StudyMaterialSection({ courseId , course}) {
         {
             name: 'Test Series',
             desc: 'Take tests to evaluate your preparation',
-            icon: '/test.png',
+            icon: <ScrollText className="w-8 h-8 text-amber-400" />,
             path: `/course/${courseId}/test`,
             color: 'from-amber-500/20 to-amber-600/10',
             iconBg: 'bg-amber-500/20',
@@ -47,7 +48,7 @@ function StudyMaterialSection({ courseId , course}) {
         {
             name: 'Record and Learn',
             desc: 'Record your voice and learn',
-            icon: '/voice.png',
+            icon: <Mic className="w-8 h-8 text-rose-400" />,
             path: `/course/${courseId}/voice`,
             color: 'from-rose-500/20 to-rose-600/10',
             iconBg: 'bg-rose-500/20',

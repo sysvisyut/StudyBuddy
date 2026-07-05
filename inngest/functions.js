@@ -112,9 +112,10 @@ export const GenerateStudyTypeContent = inngest.createFunction(
 
     async({event,step})=>{
         const {studyType,prompt,courseId,recordId} = event.data;
-
-        const FlashcardAiResult = await step.run('Generating Flashcard using AI',async()=>{
-            const result = await generateStudyTypeContentAiModel.sendMessage(prompt);
+        const FlashcardAiResult = await step.run('Generating Study Type Content using AI', async () => {
+            const result = studyType === 'Flashcard'
+                ? await generateStudyTypeContentAiModel.sendMessage(prompt)
+                : await GenerateQuizAiModel.sendMessage(prompt);
             const rawText = result.response.text();
             
             // Strip markdown code fences if present (e.g. ```json ... ```)

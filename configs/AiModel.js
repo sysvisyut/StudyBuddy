@@ -6,7 +6,7 @@ if (!apiKey) {
   console.warn("NEXT_PUBLIC_GEMINI_API_KEY is not defined in the environment variables.");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey as string);
+const genAI = new GoogleGenerativeAI(apiKey);
 
 export const generationConfig = {
   temperature: 0.7,
@@ -342,3 +342,45 @@ Do not include markdown, explanations, or code fences.`,
       },
     ],
   });
+
+
+  export const GenerateQuizAiModel = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+  }).startChat({
+    generationConfig,
+    history: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: "Generate quiz on the topic: Flutter Fundamentals, User Interface (UI) Development, Basic App Navigation with questions and options along with answer in JSON format"
+          }
+        ]
+      },
+      {
+        role: "model",
+        parts: [
+          {
+            text: `{
+  "quizTitle": "Flutter Fundamentals, UI Development & Basic App Navigation",
+  "questions": [
+    {
+      "question": "What is Flutter?",
+      "options": [
+        "A programming language",
+        "A UI toolkit by Google",
+        "A database",
+        "An operating system"
+      ],
+      "answer": "A UI toolkit by Google"
+    }
+  ]
+}`
+          }
+        ]
+      }
+    ]
+  });
+
+
+  

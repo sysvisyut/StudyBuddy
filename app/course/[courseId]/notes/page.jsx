@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, BookOpen, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, BookOpen, Loader2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 function ViewNotes() {
     const { courseId } = useParams();
@@ -71,6 +72,15 @@ function ViewNotes() {
         <div className='p-6 md:p-10 max-w-4xl mx-auto'>
 
             {/* Header */}
+            <div className='mb-4'>
+                <Link href={`/course/${courseId}`}>
+                    <Button variant="outline" className="border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white rounded-full">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Course
+                    </Button>
+                </Link>
+            </div>
+            
             <div className='mb-6'>
                 <div className='flex items-center gap-2 mb-1'>
                     <BookOpen className='w-5 h-5 text-indigo-400' />
@@ -81,8 +91,34 @@ function ViewNotes() {
                 </p>
             </div>
 
+            {/* Note content card */}
+            {currentNote && (
+                <div className='border border-slate-700/60 rounded-2xl bg-slate-800 shadow-[4px_4px_0_0_rgba(15,23,42,1)] overflow-hidden'>
+                    {/* Chapter label */}
+                    <div className='flex items-center justify-between px-6 py-4 border-b border-slate-700/60 bg-slate-800/80'>
+                        <div className='flex items-center gap-2'>
+                            <span className='w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs font-black'>
+                                {currentNote.chapterId + 1}
+                            </span>
+                            <h2 className='text-sm font-bold text-slate-300 uppercase tracking-widest'>
+                                Chapter {currentNote.chapterId + 1}
+                            </h2>
+                        </div>
+                        <span className='text-[10px] font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/25 px-2.5 py-1 rounded-full uppercase tracking-widest'>
+                            Notes
+                        </span>
+                    </div>
+
+                    {/* HTML content */}
+                    <div
+                        className='px-6 py-6 text-slate-200 leading-relaxed prose-notes'
+                        dangerouslySetInnerHTML={{ __html: currentNote.notes }}
+                    />
+                </div>
+            )}
+
             {/* Progress bar + navigation */}
-            <div className='flex gap-3 items-center mb-8'>
+            <div className='flex gap-3 items-center mt-8'>
                 <Button
                     variant='outline'
                     size='sm'
@@ -122,32 +158,6 @@ function ViewNotes() {
                     <ChevronRight className='w-4 h-4' />
                 </Button>
             </div>
-
-            {/* Note content card */}
-            {currentNote && (
-                <div className='border border-slate-700/60 rounded-2xl bg-slate-800 shadow-[4px_4px_0_0_rgba(15,23,42,1)] overflow-hidden'>
-                    {/* Chapter label */}
-                    <div className='flex items-center justify-between px-6 py-4 border-b border-slate-700/60 bg-slate-800/80'>
-                        <div className='flex items-center gap-2'>
-                            <span className='w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs font-black'>
-                                {currentNote.chapterId + 1}
-                            </span>
-                            <h2 className='text-sm font-bold text-slate-300 uppercase tracking-widest'>
-                                Chapter {currentNote.chapterId + 1}
-                            </h2>
-                        </div>
-                        <span className='text-[10px] font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/25 px-2.5 py-1 rounded-full uppercase tracking-widest'>
-                            Notes
-                        </span>
-                    </div>
-
-                    {/* HTML content */}
-                    <div
-                        className='px-6 py-6 text-slate-200 leading-relaxed prose-notes'
-                        dangerouslySetInnerHTML={{ __html: currentNote.notes }}
-                    />
-                </div>
-            )}
 
             {/* End-of-notes message */}
             {stepCount === notes.length - 1 && (

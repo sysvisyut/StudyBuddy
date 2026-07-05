@@ -12,7 +12,7 @@ function CourseIntroCard({ course }) {
             </div>
             <div className='flex-1 min-w-0'>
                 <h1 className='font-black text-2xl text-white leading-tight mb-1'>
-                    {course?.courseLayout?.course_title || 'Untitled Course'}
+                    {course?.courseLayout?.course_title || course?.courseLayout?.courseTitle || course?.courseLayout?.title || course?.topic || 'Untitled Course'}
                 </h1>
                 <p className='text-slate-400 text-sm leading-relaxed line-clamp-3 mb-4'>
                     {course?.courseLayout?.summary || 'No summary available.'}

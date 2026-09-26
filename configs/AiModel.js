@@ -1,9 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
-  console.warn("NEXT_PUBLIC_GEMINI_API_KEY is not defined in the environment variables.");
+  throw new Error(
+    "[StudyBuddy] GEMINI_API_KEY is not set. " +
+    "Add it to .env.local (server-only — do NOT use a NEXT_PUBLIC_ prefix). " +
+    "Rename any existing NEXT_PUBLIC_GEMINI_API_KEY entry to GEMINI_API_KEY in every environment."
+  );
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);

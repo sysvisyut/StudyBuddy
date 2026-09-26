@@ -257,7 +257,7 @@ Go to **Dashboard → Upgrade** to view the pricing page and subscribe via Strip
 
 ## Environment Variables
 
-Create a `.env.local` file in the project root with the following keys:
+Create a `.env.local` file in the project root (copy from `.env.local.example` and fill in real values):
 
 | Variable | Description | Required |
 |---|---|---|
@@ -266,12 +266,14 @@ Create a `.env.local` file in the project root with the following keys:
 | `CLERK_SECRET_KEY` | Clerk secret key | ✅ |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | Clerk sign-in redirect path (e.g. `/sign-in`) | ✅ |
 | `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | Clerk sign-up redirect path (e.g. `/sign-up`) | ✅ |
-| `NEXT_PUBLIC_GEMINI_API_KEY` | Google Gemini API key | ✅ |
+| `GEMINI_API_KEY` | Google Gemini API key — **server-only, must not use `NEXT_PUBLIC_` prefix** | ✅ |
 | `STRIPE_SECRET_KEY` | Stripe secret key (`sk_live_...` or `sk_test_...`) | ✅ |
 | `STRIPE_PRICE_ID` | Stripe Price ID for the Pro subscription product | ✅ |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret (for signature verification) | ✅ |
 | `NEXT_PUBLIC_APP_URL` | Public base URL for Stripe redirect (e.g. `http://localhost:3000`) | ✅ |
 | `INNGEST_DEV` | Set to `1` to enable Inngest dev mode locally | Optional |
+
+> **⚠️ Breaking change (for existing setups):** If you had `NEXT_PUBLIC_GEMINI_API_KEY` in a previous `.env.local`, Vercel environment, or CI configuration, rename it to `GEMINI_API_KEY`. The app will throw a clear error on startup if the key is missing under the new name.
 
 ---
 

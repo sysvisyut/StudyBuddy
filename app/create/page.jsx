@@ -28,19 +28,29 @@ function Create() {
     }
 
 
-    const GenerateCourseOutline = () => {
+    const GenerateCourseOutline = async () => {
         const courseId = uuidv4();
         setLoading(true);
-        // Fire and forget — Inngest handles generation in the background
-        axios.post('/api/generate-course-outline', {
-            courseId: courseId,
-            topic: formData?.topic || "Custom Topic",
-            courseType: formData?.option || "Standard",
-            difficultyLevel: formData?.difficulty || "Medium",
-            createdBy: user?.primaryEmailAddress?.emailAddress
-        });
-        toast("Your Course content is generating, Please wait");
-        router.replace('/dashboard');
+        try {
+            await axios.post('/api/generate-course-outline', {
+                courseId: courseId,
+                topic: formData?.topic || "Custom Topic",
+                courseType: formData?.option || "Standard",
+                difficultyLevel: formData?.difficulty || "Medium",
+                createdBy: user?.primaryEmailAddress?.emailAddress
+            });
+            toast.success("Your Course content is generating, Please wait");
+            router.replace('/dashboard');
+        } catch (err) {
+            const serverMessage = err.response?.data?.error;
+            if (serverMessage) {
+                toast.error(serverMessage);
+            } else {
+                toast.error("Something went wrong, please try again");
+            }
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -78,7 +88,7 @@ function Create() {
 
                 {step == 0 ? null : (
                     <Button
-                        onClick={() => GenerateCourseOutline()} 
+                        onClick={GenerateCourseOutline} 
                         disabled={loading}
                         className='px-12 py-8 text-xl rounded-full bg-white text-black hover:bg-slate-200 transition-all font-black uppercase tracking-tight'
                     >

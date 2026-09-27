@@ -71,7 +71,7 @@ function ResultsScreen({ questions, userAnswers, onRestart, onRegenerate, canReg
                     <GradeIcon className={`w-10 h-10 ${grade.color}`} />
                 </div>
                 <h2 className={`text-3xl font-black mb-1 ${grade.color}`}>{grade.label}</h2>
-                <p className='text-slate-400 text-sm mb-6'>Quiz complete — here's how you did</p>
+                <p className='text-slate-400 text-sm mb-6'>Quiz complete — here&apos;s how you did</p>
 
                 <div className='flex items-end justify-center gap-2 mb-6'>
                     <span className='text-7xl font-black text-white'>{pct}</span>

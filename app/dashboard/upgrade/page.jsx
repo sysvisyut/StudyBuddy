@@ -194,7 +194,7 @@ function UpgradePageContent() {
                         <div className='w-full flex flex-col items-center gap-3'>
                             <div className='w-full flex items-center justify-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold rounded-xl py-3 text-sm'>
                                 <Crown className='w-4 h-4' />
-                                You're a Pro Member!
+                                You&apos;re a Pro Member!
                             </div>
                             <p className='text-slate-500 text-xs text-center'>
                                 Your subscription is active. Enjoy unlimited learning!

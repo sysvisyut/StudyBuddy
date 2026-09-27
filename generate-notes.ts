@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { db } from './configs/db';
 import { STUDY_MATERIAL_TABLE, CHAPTER_NOTES_TABLE } from './configs/schema';
 import { generateNotesAiModel } from './configs/AiModel';

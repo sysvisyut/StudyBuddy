@@ -31,7 +31,7 @@ function DeleteConfirmModal({ courseName, onConfirm, onCancel, deleting }) {
                     <div>
                         <h3 className='font-black text-lg text-white'>Delete Course?</h3>
                         <p className='text-slate-400 text-sm mt-1 leading-relaxed'>
-                            <span className='text-white font-semibold'>"{courseName}"</span> and all its notes will be permanently deleted. This cannot be undone.
+                            <span className='text-white font-semibold'>&quot;{courseName}&quot;</span> and all its notes will be permanently deleted. This cannot be undone.
                         </p>
                     </div>
 

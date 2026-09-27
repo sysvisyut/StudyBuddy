@@ -7,7 +7,10 @@ export const USER_TABLE = pgTable('users', {
     isMember: boolean().default(false),
     stripeCustomerId: varchar('stripeCustomerId', { length: 255 }),
     stripeSubscriptionId: varchar('stripeSubscriptionId', { length: 255 }),
-});
+}, (table) => [
+    uniqueIndex('idx_users_email').on(table.email),
+    index('idx_users_stripe_subscription_id').on(table.stripeSubscriptionId),
+]);
 
 export const STUDY_MATERIAL_TABLE = pgTable('study_material', {
     id: serial().primaryKey(),

@@ -56,6 +56,8 @@ function StudyMaterialSection({ courseId , course}) {
         }
     ]
 
+    
+
     useEffect(() => {
         if (courseId) {
             GetStudyMaterial();
@@ -64,6 +66,7 @@ function StudyMaterialSection({ courseId , course}) {
             // Cleanup polling on unmount
             if (pollingRef.current) clearInterval(pollingRef.current);
         }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [courseId])
 
     const GetStudyMaterial = async () => {

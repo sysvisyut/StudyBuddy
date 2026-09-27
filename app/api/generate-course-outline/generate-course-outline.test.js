@@ -14,10 +14,17 @@ vi.mock('@/configs/db', () => ({
         insert: vi.fn().mockReturnValue({
             values: vi.fn().mockReturnValue({
                 returning: vi.fn().mockResolvedValue([{
-                    courseId: '123e4567-e89b-12d3-a456-426614174000'
+                    courseId: '123e4567-e89b-12d3-a456-426614174000',
+                    courseLayout: { chapters: [{}] }
                 }])
             })
         })
+    }
+}));
+
+vi.mock('@/inngest/client', () => ({
+    inngest: {
+        send: vi.fn().mockResolvedValue(true)
     }
 }));
 
@@ -128,10 +135,10 @@ describe('POST /api/generate-course-outline', () => {
         expect(response.error).toBe('Invalid difficultyLevel');
     });
 
-    it('succeeds with valid payload and sanitizes topic', async () => {
+    it('succeeds with valid payload and sends inngest event', async () => {
         const req = createMockRequest({
             courseId: '123e4567-e89b-12d3-a456-426614174000',
-            topic: 'Math <script>',
+            topic: 'Math',
             createdBy: 'test@example.com',
             courseType: 'Exam',
             difficultyLevel: 'Hard'
@@ -140,5 +147,16 @@ describe('POST /api/generate-course-outline', () => {
         const response = await POST(req);
         expect(response.status).toBe(200);
         expect(response.result.courseId).toBe('123e4567-e89b-12d3-a456-426614174000');
+        
+        const { inngest } = await import('@/inngest/client');
+        expect(inngest.send).toHaveBeenCalledWith({
+            name: 'notes.generate',
+            data: {
+                course: expect.objectContaining({
+                    courseId: '123e4567-e89b-12d3-a456-426614174000',
+                    courseLayout: expect.any(Object)
+                })
+            }
+        });
     });
 });

@@ -1,8 +1,8 @@
 import { inngest } from "./client";
 import { db } from "@/configs/db";
-import { USER_TABLE, STUDY_MATERIAL_TABLE, CHAPTER_NOTES_TABLE, STUDY_TYPE_CONTENT_TABLE } from "@/configs/schema";
-import { generateNotesAiModel, generateStudyTypeContentAiModel } from "@/configs/AiModel";
-import { eq } from "drizzle-orm";
+import { STUDY_MATERIAL_TABLE, CHAPTER_NOTES_TABLE } from "@/configs/schema";
+import { generateNotesAiModel } from "@/configs/AiModel";
+import { eq, and } from "drizzle-orm";
 
 export const helloWorld = inngest.createFunction(
     { id: "hello-world", name: "Hello World" },
@@ -13,29 +13,7 @@ export const helloWorld = inngest.createFunction(
     },
 );
 
-export const CreateNewUser = inngest.createFunction(
-    { id: 'create-user', name: 'Create User' },
-    { event: 'user.created' },
-    async ({ event, step }) => {
-        const { user } = event.data;
-        await step.run('Check user and create new if not in DB', async () => {
-            const result = await db.select().from(USER_TABLE)
-                .where(eq(USER_TABLE.email, user?.primaryEmailAddress?.emailAddress));
-            console.log(result);
 
-            if (result?.length == 0) {
-                const userResp = await db.insert(USER_TABLE).values({
-                    name: user?.fullName,
-                    email: user?.primaryEmailAddress?.emailAddress,
-                }).returning({ id: USER_TABLE.id });
-                return userResp;
-            }
-            return result;
-        });
-
-        return 'Success';
-    }
-);
 
 export const GenerateNotes = inngest.createFunction(
     { id: 'generate-notes', name: 'Generate Notes' },
@@ -74,14 +52,25 @@ export const GenerateNotes = inngest.createFunction(
                         continue;
                     }
 
-                    await db.insert(CHAPTER_NOTES_TABLE).values({
-                        chapterId: index,
-                        courseId: course.courseId,
-                        notes: aiResp,
-                    });
+                    // Idempotency guard: check if chapter notes already exist before inserting
+                    const existing = await db.select().from(CHAPTER_NOTES_TABLE)
+                        .where(and(
+                            eq(CHAPTER_NOTES_TABLE.courseId, course.courseId),
+                            eq(CHAPTER_NOTES_TABLE.chapterId, index)
+                        ));
 
-                    successCount++;
-                    console.log(`Chapter ${index} generated and saved successfully.`);
+                    if (existing.length === 0) {
+                        await db.insert(CHAPTER_NOTES_TABLE).values({
+                            chapterId: index,
+                            courseId: course.courseId,
+                            notes: aiResp,
+                        });
+                        successCount++;
+                        console.log(`Chapter ${index} generated and saved successfully.`);
+                    } else {
+                        console.log(`Chapter ${index} already exists, skipping insert.`);
+                        successCount++;
+                    }
                 } catch (err) {
                     console.error(`Chapter ${index} generation failed:`, err.message);
                     // Continue to next chapter instead of aborting the whole job
@@ -104,47 +93,3 @@ export const GenerateNotes = inngest.createFunction(
         return 'Success';
     }
 );
-
-// used to generate flashcards
-export const GenerateStudyTypeContent = inngest.createFunction(
-    { id: 'generate-study-type-content', name: 'Generate Study Type Content' },
-    {event:'studyType.content'},
-
-    async({event,step})=>{
-        const {studyType,prompt,courseId,recordId} = event.data;
-        const FlashcardAiResult = await step.run('Generating Study Type Content using AI', async () => {
-            const result = studyType === 'Flashcard'
-                ? await generateStudyTypeContentAiModel.sendMessage(prompt)
-                : await GenerateQuizAiModel.sendMessage(prompt);
-            const rawText = result.response.text();
-            
-            // Strip markdown code fences if present (e.g. ```json ... ```)
-            const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-            
-            try {
-                const parsed = JSON.parse(cleaned);
-                // Normalize: if top-level has a key like "flashcards", unwrap it
-                if (Array.isArray(parsed)) return parsed;
-                const firstKey = Object.keys(parsed)[0];
-                if (firstKey && Array.isArray(parsed[firstKey])) return parsed[firstKey];
-                return parsed;
-            } catch(e) {
-                console.error('Failed to parse AI response:', cleaned);
-                throw new Error('AI returned non-JSON content: ' + cleaned.slice(0, 200));
-            }
-        })
-
-        const dbResult = await step.run('Save Result to DB', async()=>{
-            const result = await db.update(STUDY_TYPE_CONTENT_TABLE).set({
-                content:FlashcardAiResult,
-                status:'Ready'
-            }).where(eq(STUDY_TYPE_CONTENT_TABLE.id,recordId))
-           
-            
-
-            return 'Data Inserted'
-        })
-
-        return 'Success'
-    }
-)

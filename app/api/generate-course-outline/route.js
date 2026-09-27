@@ -1,61 +1,10 @@
 import { NextResponse } from "next/server";
-import { courseOutlineAIModel, generateNotesAiModel } from "@/configs/AiModel";
+import { courseOutlineAIModel } from "@/configs/AiModel";
 import { db } from "@/configs/db";
-import { STUDY_MATERIAL_TABLE, CHAPTER_NOTES_TABLE } from "@/configs/schema";
-import { eq } from "drizzle-orm";
+import { STUDY_MATERIAL_TABLE } from "@/configs/schema";
+import { inngest } from "@/inngest/client";
 
-/**
- * Generates chapter notes in the background after responding to the client.
- * Runs fully async — does not block the HTTP response.
- */
-async function generateNotesInBackground(insertedCourse) {
-    const { courseId, courseLayout } = insertedCourse;
-    const chapters = courseLayout?.chapters;
 
-    if (!chapters || chapters.length === 0) {
-        console.warn(`[Notes] No chapters found for courseId=${courseId}`);
-        return;
-    }
-
-    console.log(`[Notes] Starting background generation for courseId=${courseId} (${chapters.length} chapters)`);
-    let successCount = 0;
-
-    for (let index = 0; index < chapters.length; index++) {
-        const chapter = chapters[index];
-        try {
-            const PROMPT = `Generate exam material detail content for each chapter, make sure to include all topic points in the content, make sure to give content in HTML format (Do not add HTML, head, body, title tag). The chapter: ${JSON.stringify(chapter)}`;
-
-            const result = await generateNotesAiModel.sendMessage(PROMPT);
-            const aiResp = result.response.text();
-
-            if (!aiResp || aiResp.trim() === '') {
-                console.warn(`[Notes] Chapter ${index}: AI returned empty response, skipping.`);
-                continue;
-            }
-
-            await db.insert(CHAPTER_NOTES_TABLE).values({
-                chapterId: index,
-                courseId: courseId,
-                notes: aiResp,
-            });
-
-            successCount++;
-            console.log(`[Notes] Chapter ${index} saved. (${successCount}/${chapters.length})`);
-        } catch (err) {
-            console.error(`[Notes] Chapter ${index} failed:`, err.message);
-        }
-    }
-
-    // Update course status to Ready
-    try {
-        await db.update(STUDY_MATERIAL_TABLE)
-            .set({ status: 'Ready' })
-            .where(eq(STUDY_MATERIAL_TABLE.courseId, courseId));
-        console.log(`[Notes] courseId=${courseId} marked Ready. (${successCount}/${chapters.length} chapters)`);
-    } catch (err) {
-        console.error(`[Notes] Failed to update status for courseId=${courseId}:`, err.message);
-    }
-}
 
 import { validate as uuidValidate } from 'uuid';
 
@@ -127,11 +76,18 @@ export async function POST(req) {
         const insertedCourse = dbResult[0];
         console.log(`[Outline] Course inserted: courseId=${insertedCourse.courseId}`);
 
-        // 3. Fire-and-forget: generate chapter notes in the background
-        //    Response returns immediately; notes are generated async.
-        generateNotesInBackground(insertedCourse).catch((err) => {
-            console.error('[Notes] Unhandled error in background generation:', err.message);
-        });
+        // 3. Trigger notes generation via Inngest durable event
+        try {
+            await inngest.send({ 
+                name: 'notes.generate', 
+                data: { course: insertedCourse } 
+            });
+            console.log(`[Outline] Sent notes.generate event for courseId=${insertedCourse.courseId}`);
+        } catch (err) {
+            // Log loudly but still return success since the outline saved.
+            // Notes generation is deferred/failed but course exists.
+            console.error('[Notes] Failed to send Inngest event:', err.message);
+        }
 
         return NextResponse.json({ result: insertedCourse });
     } catch (error) {

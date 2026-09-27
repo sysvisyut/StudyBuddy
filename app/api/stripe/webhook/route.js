@@ -64,6 +64,28 @@ export async function POST(req) {
             console.error('[Stripe Webhook] DB update failed:', dbErr);
             return NextResponse.json({ error: 'DB update failed' }, { status: 500 });
         }
+    } else if (event.type === 'customer.subscription.deleted') {
+        const subscription = event.data.object;
+        const subscriptionId = subscription.id;
+
+        if (!subscriptionId) {
+            console.error('[Stripe Webhook] No subscription ID in customer.subscription.deleted event');
+            return NextResponse.json({ error: 'Missing subscription.id' }, { status: 400 });
+        }
+
+        try {
+            await db.update(USER_TABLE)
+                .set({
+                    isMember: false,
+                    stripeSubscriptionId: null,
+                })
+                .where(eq(USER_TABLE.stripeSubscriptionId, subscriptionId));
+
+            console.log(`[Stripe Webhook] Downgraded subscription: ${subscriptionId}`);
+        } catch (dbErr) {
+            console.error('[Stripe Webhook] DB update failed for cancellation:', dbErr);
+            return NextResponse.json({ error: 'DB update failed' }, { status: 500 });
+        }
     }
 
     // Acknowledge all other event types gracefully

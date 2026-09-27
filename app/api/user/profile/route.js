@@ -121,6 +121,6 @@ export async function GET(req) {
 
     } catch (error) {
         console.error("[Profile API Error]:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

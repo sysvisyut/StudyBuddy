@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, BookOpen, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import DOMPurify from 'dompurify';
 
 function ViewNotes() {
     const { courseId } = useParams();
@@ -112,7 +113,7 @@ function ViewNotes() {
                     {/* HTML content */}
                     <div
                         className='px-6 py-6 text-slate-200 leading-relaxed prose-notes'
-                        dangerouslySetInnerHTML={{ __html: currentNote.notes }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentNote.notes || '') }}
                     />
                 </div>
             )}

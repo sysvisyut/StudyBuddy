@@ -15,6 +15,9 @@ function SideBar() {
 
   const [isMember, setIsMember] = useState(false);
   const [memberLoading, setMemberLoading] = useState(true);
+  const [coursesCreated, setCoursesCreated] = useState(0);
+  const [freeLimit, setFreeLimit] = useState(5);
+  const [creditsRemaining, setCreditsRemaining] = useState(5);
 
   const MenuList = [
     {
@@ -41,7 +44,10 @@ function SideBar() {
       if (!email) return;
       try {
         const res = await axios.get(`/api/user?email=${encodeURIComponent(email)}`);
-        setIsMember(!!res.data?.isMember);
+      setIsMember(!!res.data?.isMember);
+        setCoursesCreated(res.data?.coursesCreated ?? 0);
+        setFreeLimit(res.data?.freeLimit ?? 5);
+        setCreditsRemaining(res.data?.creditsRemaining ?? 5);
       } catch (err) {
         // silently ignore — default to non-member
       } finally {
@@ -113,8 +119,11 @@ function SideBar() {
           /* Non-member state */
           <div className='bg-white/5 p-6 rounded-3xl border border-white/10'>
             <h2 className='text-sm font-semibold text-white mb-2'>Available Credits</h2>
-            <Progress value={60} className="h-1.5 mb-3 bg-white/10 [&>div]:bg-white" />
-            <h2 className='text-xs text-slate-400 mb-4'>3 Out of 5 Credits Used</h2>
+            <Progress 
+              value={freeLimit > 0 ? (coursesCreated / freeLimit) * 100 : 0} 
+              className="h-1.5 mb-3 bg-white/10 [&>div]:bg-white" 
+            />
+            <h2 className='text-xs text-slate-400 mb-4'>{coursesCreated} Out of {freeLimit} Credits Used ({creditsRemaining} remaining)</h2>
             <Link href={'/dashboard/upgrade'}>
               <Button variant="outline" className="w-full rounded-full border-white/20 text-white hover:bg-white hover:text-black transition-all font-bold">
                 Upgrade Now

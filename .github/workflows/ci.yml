@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  ci:
+    name: Lint · Test · Build
+    runs-on: ubuntu-latest
+
+    env:
+      # ── Database ────────────────────────────────────────────────────────────
+      # Real value must come from GitHub Secrets in any deploy workflow.
+      # Here we supply a structurally-valid dummy so Next.js/Neon imports don't
+      # crash at module-load time during build. Tests mock the DB entirely.
+      DATABASE_CONNECTION_STRING: postgresql://ci_user:ci_password@localhost:5432/ci_db?sslmode=require
+
+      # ── Clerk Authentication ─────────────────────────────────────────────────
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_dummy_ci_key_not_real
+      CLERK_SECRET_KEY: sk_test_dummy_ci_key_not_real
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+
+      # ── Google Gemini AI ─────────────────────────────────────────────────────
+      GEMINI_API_KEY: AIzaSy_dummy_ci_key_not_real
+
+      # ── Stripe Payments ──────────────────────────────────────────────────────
+      STRIPE_SECRET_KEY: sk_test_dummy_ci_key_not_real
+      STRIPE_PRICE_ID: price_dummy_ci_id_not_real
+      STRIPE_WEBHOOK_SECRET: whsec_dummy_ci_secret_not_real
+
+      # ── App URL ──────────────────────────────────────────────────────────────
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+      # ── Inngest ──────────────────────────────────────────────────────────────
+      # Not required for build/test — omitted intentionally.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # No engines field or .nvmrc in this project.
+      # Node 20 LTS satisfies Next.js 16's >=18 requirement and is the current
+      # Active LTS — update to 22 LTS once it enters Active LTS in April 2025.
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # npm ci is strictly reproducible — uses package-lock.json, never upgrades.
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      # Fail fast on any lint error. Pre-existing lint errors in UI components
+      # (unescaped entities, exhaustive-deps, etc.) that were out of scope for
+      # the engineering feature set will cause this step to fail — see NOTE below.
+      - name: Lint
+        run: npm run lint
+
+      # Vitest runs offline — every test mocks DB and external services.
+      # No network calls, no real secrets needed.
+      - name: Test
+        run: npm test
+
+      # Next.js build validates page/route graph, TypeScript types, and import
+      # resolution. Fails if any required env var is read at build-import time
+      # and missing — the env block above covers all such variables from
+      # .env.local.example.
+      - name: Build
+        run: npm run build

@@ -8,6 +8,7 @@ import {
     extractJsonArray,
     validateStudyContent,
 } from "@/lib/studyContent";
+import { requireCourseOwnership } from "@/lib/auth";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -96,6 +97,10 @@ export async function POST(req) {
     if (!courseId || !type) {
         return NextResponse.json({ error: "Missing required fields: courseId, type" }, { status: 400 });
     }
+
+    const { errorResponse } = await requireCourseOwnership(courseId);
+    if (errorResponse) return errorResponse;
+
     // Context for AI: prefer frontend topic + chapters, otherwise whatever we have
     const aiTopicContext = [frontendTopic, chapters].filter(Boolean).join(' - ') || type;
 

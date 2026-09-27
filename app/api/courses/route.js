@@ -2,6 +2,7 @@ import { db } from "@/configs/db";
 import { STUDY_MATERIAL_TABLE, CHAPTER_NOTES_TABLE } from "@/configs/schema";
 import { eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { requireCourseOwnership, getAuthEmail } from "@/lib/auth";
 
 export async function DELETE(req) {
     try {
@@ -11,6 +12,9 @@ export async function DELETE(req) {
         if (!courseId) {
             return NextResponse.json({ error: "Missing courseId" }, { status: 400 });
         }
+
+        const { errorResponse } = await requireCourseOwnership(courseId);
+        if (errorResponse) return errorResponse;
 
         // Delete all chapter notes for this course first (foreign key safety)
         await db.delete(CHAPTER_NOTES_TABLE)
@@ -33,27 +37,25 @@ export async function DELETE(req) {
 }
 
 
-export async function POST(req) { // export makes the fn available outside the file
-    
-    const {createdBy} = await req.json();
-
-    if (!createdBy) {
-        return NextResponse.json({ error: "Missing createdBy parameter" }, { status: 400 });
+export async function POST(_req) {
+    const userEmail = await getAuthEmail();
+    if (!userEmail) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const result = await db.select().from(STUDY_MATERIAL_TABLE)
-    .where(eq(STUDY_MATERIAL_TABLE.createdBy,createdBy))
-    .orderBy(desc(STUDY_MATERIAL_TABLE.id));
+        .where(eq(STUDY_MATERIAL_TABLE.createdBy, userEmail))
+        .orderBy(desc(STUDY_MATERIAL_TABLE.id));
 
-    return NextResponse.json({result: result});
+    return NextResponse.json({ result });
 }
 
-export async function GET(req){
-    const reqUrl = req.url;
-    const{searchParams} = new URL(reqUrl);
-    const courseId = searchParams?.get('courseId');
+export async function GET(req) {
+    const { searchParams } = new URL(req.url);
+    const courseId = searchParams.get('courseId');
 
-    const course = await db.select().from(STUDY_MATERIAL_TABLE).where(eq(STUDY_MATERIAL_TABLE?.courseId,courseId));
+    const { errorResponse, course } = await requireCourseOwnership(courseId);
+    if (errorResponse) return errorResponse;
 
-    return NextResponse.json({result:course[0]})
+    return NextResponse.json({ result: course });
 }

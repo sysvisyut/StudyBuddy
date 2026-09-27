@@ -3,6 +3,7 @@ import { CHAPTER_NOTES_TABLE, STUDY_TYPE_CONTENT_TABLE } from "@/configs/schema"
 import { eq, and, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { normalizeType, validateStudyContent } from "@/lib/studyContent";
+import { requireCourseOwnership } from "@/lib/auth";
 
 /**
  * Normalizes a row fetched from the DB:
@@ -82,6 +83,9 @@ export async function POST(req) {
             { status: 400 }
         );
     }
+
+    const { errorResponse } = await requireCourseOwnership(courseId);
+    if (errorResponse) return errorResponse;
 
     // ── ALL: return everything for the course dashboard ───────────────────────
     if (studyType === 'ALL') {

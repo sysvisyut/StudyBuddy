@@ -5,29 +5,40 @@ import { eq } from "drizzle-orm";
 
 export async function POST(req) {
     try {
-        const { user } = await req.json();
-
-        if (!user?.primaryEmailAddress?.emailAddress) {
-            return NextResponse.json({ error: "User email address is missing" }, { status: 400 });
+        let body;
+        try {
+            body = await req.json();
+        } catch (_e) {
+            return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
         }
 
-        // Check if user already exists
-        const result = await db.select().from(USER_TABLE)
-            .where(eq(USER_TABLE.email, user?.primaryEmailAddress?.emailAddress));
+        const { user } = body;
+        const email = user?.primaryEmailAddress?.emailAddress;
+        
+        if (!email || typeof email !== 'string' || email.trim() === '') {
+            return NextResponse.json({ error: "User email address is missing or invalid" }, { status: 400 });
+        }
+        
+        const name = user?.fullName ?? '';
 
-        if (result?.length === 0) {
-            // If not, insert new user
-            const userResp = await db.insert(USER_TABLE).values({
-                name: user?.fullName,
-                email: user?.primaryEmailAddress?.emailAddress,
-            }).returning({ id: USER_TABLE.id });
+        // Atomic upsert: try to insert, do nothing if conflict on email
+        const userResp = await db.insert(USER_TABLE).values({
+            name,
+            email,
+        })
+        .onConflictDoNothing({ target: USER_TABLE.email })
+        .returning();
 
-            return NextResponse.json({ result: userResp[0] });
+        if (userResp.length === 0) {
+            // Conflict occurred, the user already exists. Fetch the existing row.
+            const existingUser = await db.select().from(USER_TABLE)
+                .where(eq(USER_TABLE.email, email));
+            return NextResponse.json({ result: existingUser[0] });
         }
 
-        return NextResponse.json({ result: result[0] });
+        return NextResponse.json({ result: userResp[0] });
     } catch (error) {
         console.error("Error in create-user API:", error);
-        return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
